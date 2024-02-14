@@ -1,0 +1,264 @@
+{
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "size",
+          "type": "uint32"
+        }
+      ],
+      "name": "BaseFinal",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint32",
+          "name": "size",
+          "type": "uint32"
+        }
+      ],
+      "name": "DeltaUpdate",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "_asn",
+          "type": "uint32"
+        },
+        {
+          "internalType": "string",
+          "name": "_ipPrefix",
+          "type": "string"
+        },
+        {
+          "internalType": "uint8",
+          "name": "_maxLength",
+          "type": "uint8"
+        }
+      ],
+      "name": "addBaseVRP",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bool",
+          "name": "toAdd",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint32",
+          "name": "_asn",
+          "type": "uint32"
+        },
+        {
+          "internalType": "string",
+          "name": "_ipPrefix",
+          "type": "string"
+        },
+        {
+          "internalType": "uint8",
+          "name": "_maxLength",
+          "type": "uint8"
+        }
+      ],
+      "name": "addDeltaVRP",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "addNewDelta",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "bcastDeltaUpdate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "bcastVRPS",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "deltaSeries",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "size",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "index",
+          "type": "uint32"
+        }
+      ],
+      "name": "getBaseVRP",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "asn",
+              "type": "uint32"
+            },
+            {
+              "internalType": "string",
+              "name": "ipPrefix",
+              "type": "string"
+            },
+            {
+              "internalType": "uint8",
+              "name": "maxLength",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct VRPManager.VRPEntry",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getDeltaCount",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "addBool",
+          "type": "bool"
+        }
+      ],
+      "name": "getDeltaEntryCount",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint32",
+          "name": "deltaIndex",
+          "type": "uint32"
+        },
+        {
+          "internalType": "uint32",
+          "name": "vrpIndex",
+          "type": "uint32"
+        },
+        {
+          "internalType": "bool",
+          "name": "addBool",
+          "type": "bool"
+        }
+      ],
+      "name": "getDeltaVRPEntry",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint32",
+              "name": "asn",
+              "type": "uint32"
+            },
+            {
+              "internalType": "string",
+              "name": "ipPrefix",
+              "type": "string"
+            },
+            {
+              "internalType": "uint8",
+              "name": "maxLength",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct VRPManager.VRPEntry",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "vrpBase",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "size",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ]
+}

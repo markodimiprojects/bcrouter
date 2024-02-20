@@ -1,9 +1,8 @@
-FROM python:3
+FROM python:latest
 
-
-RUN pip install web3
 RUN pip install requests
 RUN pip install python-dotenv
+RUN pip install web3
 
 WORKDIR /usr/app/src
 # Config for rest

@@ -11,8 +11,9 @@ Allows for uploading the base snapshot and deltas in parallel
 
 def uploadTest():
     try:
-        p1 = mp.Process(target=baseUpload())
-        p2 = mp.Process(target=deltaUpload())
+        # Create parallel processes for uploading base snapshot and deltas
+        p1 = mp.Process(target=baseUpload)
+        p2 = mp.Process(target=deltaUpload)
         p1.start()
         p2.start()
         p1.join()
@@ -61,9 +62,15 @@ def deltaUpload():
             nextSerial += 1
         time.sleep(15)
 
+def downloadTest():
+    bcH = blockchainHandler()
+    snapshot = bcH.getNewestSnapshot()
+    print(snapshot)
+
 
 def main():
     uploadTest()
+    #downloadTest()
 
 
 if __name__ == '__main__':

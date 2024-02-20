@@ -8,8 +8,8 @@ class jsonHandler:
     def __init__(self):
         # Initialization finishes once Routinator fetches all VRPs
         load_dotenv()
-        self.httpURL = os.getenv("HTTPURL")
-
+        self.httpURL = os.getenv("HTTPURL_TEST")
+        print("Setting up routinator")
         # Spinlock waiting for proper return code
         while True:
             time.sleep(10)

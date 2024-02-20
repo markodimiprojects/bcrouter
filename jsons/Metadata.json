@@ -129,6 +129,19 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "getBaseSize",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint32",
@@ -181,7 +194,7 @@
       "inputs": [
         {
           "internalType": "uint32",
-          "name": "version",
+          "name": "deltaIndex",
           "type": "uint32"
         },
         {

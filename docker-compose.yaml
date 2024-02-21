@@ -5,22 +5,21 @@ services:
       - json-cache:/json/cache
     ports:
       - 8323:8323
-    # Should stop output to console
     logging:
       driver: "none"
   rtrtr:
     image: "nlnetlabs/rtrtr"
     command: ["--config", "/cache/rtrtr.conf"]
     volumes:
-      - ./rtrtr.conf:/cache/rtrtr.conf
-  #Add once blockchain works
-  #bird:
-  #  image: my-bird:latest
-  #  container_name: bird2-router
-  #  network_mode: "bridge"
-  #  volumes:
-  #    - ./bird.conf:/etc/bird/bird.conf
-  #  restart: unless-stopped
+      - ./config/rtrtr.conf:/cache/rtrtr.conf
+  # Add once blockchain works
+  bird2:
+    image: my-bird:latest
+    container_name: bird2-router
+    network_mode: "bridge"
+    volumes:
+      - ./config/bird.conf:/etc/bird/bird.conf
+    restart: unless-stopped
   blockchain:
     build: "./"
     volumes:

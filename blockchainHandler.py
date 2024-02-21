@@ -1,9 +1,16 @@
+__author__ = "Marko Dimitrijevic, 7633863"
+
 import json
-import time
 
 from web3 import Web3
 import os
 from dotenv import load_dotenv
+
+"""
+@author: Marko Dimitrijevic, 7633863
+
+This class is responsible for fetching data from the Routinator connection
+"""
 
 
 class blockchainHandler:
@@ -15,18 +22,20 @@ class blockchainHandler:
 
         # Access data from .env
         load_dotenv()
-        # Node access point
+        # Node access URL
         self.node_url = os.getenv("NODE_URL_TEST")
         # Address of contract on the blockchain
         self.contract_address = os.getenv("CONTRACT_ADDRESS_TEST")
         # Address of user
         self.caller = os.getenv("CALLER_TEST")
-        # Private key to sign transactions
+        # Private key of user to sign transactions
+        # MUST MATCH MAINTAINER TO ADD TO BLOCKCHAIN
         self.private_key = os.getenv("PRIVATE_KEY_TEST")
 
         # Initialize web3 interaction handler and relevant data
         self.web3 = Web3(Web3.HTTPProvider(self.node_url))
 
+        # Get smart contract functions
         with open("Metadata.json") as f:
             info_json = json.load(f)
         self.abi = info_json["abi"]
@@ -75,31 +84,72 @@ class blockchainHandler:
         except Exception as e:
             print("Error uploading base VRP (retrying): " + str(e))
 
-
     def getBaseSize(self):
-        return self.contract.functions.getBaseSize().call()
+        """
+        Get amount of VRPs in baseVRP
+        :return: size (Amount of Elements in baseVRP)
+        :rtype: Int
+        """
+        try:
+            return self.contract.functions.getBaseSize().call()
+        except Exception as e:
+            print("Error fetching baseVRP size: " + str(e))
 
     def getDeltaVRP(self, deltaIndex, vrpIndex, toAdd):
-        return self.contract.functions.getDeltaVRPEntry(deltaIndex, vrpIndex, toAdd).call()
+        """
+        Get specified delta VRP
+        :param deltaIndex: Index of delta
+        :type deltaIndex: Int
+        :param vrpIndex: Index of VRP in specified delta
+        :type vrpIndex: Int
+        :param toAdd: Boolean to specify list (False - Remove List; True - Add List)
+        :type toAdd: Bool
+        :return: Delta VRP
+        :rtype: Dict
+        """
+        try:
+            return self.contract.functions.getDeltaVRPEntry(deltaIndex, vrpIndex, toAdd).call()
+        except Exception as e:
+            print("Error fetching specified delta VRP: " + str(e))
 
     def getDeltaCount(self):
-        return self.contract.functions.getDeltaCount().call()
+        """
+         Get amount of deltas in deltaSeries
+        :return: size (Amount of Elements in deltaSeries)
+        :rtype: Int
+        """
+        try:
+            return self.contract.functions.getDeltaCount().call()
+        except Exception as e:
+            print("Error fetching delta count: " + str(e))
 
     def getDeltaEntryCount(self, index, addBool):
-        return self.contract.functions.getDeltaEntryCount(index, addBool).call()
+        """
+        Get amount of entries contained in an Add/Remove list of a specified delta
+        :param index: Delta Index
+        :type index: int
+        :param addBool: List specifier Boolean (False - Remove List; True - Add List)
+        :type addBool: Bool
+        :return: Amount of VRPs contained in specifed list
+        :rtype: int
+        """
+        try:
+            return self.contract.functions.getDeltaEntryCount(index, addBool).call()
+        except Exception as e:
+            print("Error fetching delta entry count: " + str(e))
 
     def addNewDelta(self):
         """
         Adds a new Delta entry to the Delta series
         """
         try:
-            while True:
+            while True:  # Retries necessary for parallel uploading of deltas and base snapshot
                 call = self.contract.functions.addNewDelta().build_transaction(
                     {"chainId": self.chain_id, "from": self.caller, "nonce": self.nonce})
                 signed_tx = self.web3.eth.account.sign_transaction(call, private_key=self.private_key)
                 send_tx = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
                 tx_receipt = self.web3.eth.wait_for_transaction_receipt(send_tx)
-                #print(tx_receipt)  # Optional
+                # print(tx_receipt)  # Optional
                 self.updateNonce()
                 return
         except Exception as e:
@@ -119,7 +169,7 @@ class blockchainHandler:
         :type maxLength: int
         """
         try:
-            while True:
+            while True:  # Retries necessary for parallel uploading of deltas and base snapshot
                 call = self.contract.functions.addDeltaVRP(toAdd, asn, ipPrefix, maxLength).build_transaction(
                     {"chainId": self.chain_id, "from": self.caller, "nonce": self.nonce})
                 signed_tx = self.web3.eth.account.sign_transaction(call, private_key=self.private_key)
@@ -133,7 +183,9 @@ class blockchainHandler:
 
     def addDelta(self, deltaJSON):
         """
-        Add a Delta to deltaSeries from a JSON
+        Add a delta to the blockchain from a given delta JSON
+        :param deltaJSON: JSON containing data
+        :type deltaJSON: Dict
         """
         # Add a new delta entry before adding deltas
         self.addNewDelta()
@@ -145,52 +197,68 @@ class blockchainHandler:
             asn = vrp["asn"][2::]  # Remove characters from ASN
             ipPrefix = vrp["prefix"]
             maxLength = vrp["maxLength"]
-            # print("Adding: AS%s, Prefix: %s, maxLength: %s" % (str(asn), ipPrefix, str(maxLength)))
             self.addDeltaVRP(True, int(asn), ipPrefix, maxLength)
         for vrp in json_rmv:  # Add data from remove list
             asn = vrp["asn"][2::]
             ipPrefix = vrp["prefix"]
             maxLength = vrp["maxLength"]
-            # print("Adding: AS%s, Prefix: %s, maxLength: %s" % (str(asn), ipPrefix, str(maxLength)))
             self.addDeltaVRP(False, int(asn), ipPrefix, maxLength)
 
     def addAllBaseVRPS(self, baseJSON):
         """
-        Adds all VRPs from JSON to baseVRP
+        Adds a base snapshot from data contained in a JSON file
+        :param baseJSON: Base snapshot in JSON format
+        :type baseJSON: Dict
         """
-        json_roas = baseJSON["roas"]
+        json_vrps = baseJSON["roas"]
 
-        for vrp in json_roas:  # Adds all base VRPS
-            asn = vrp["asn"][2::]
+        for vrp in json_vrps:  # Adds all base VRPS
+            asn = vrp["asn"][2::]  # Remove characters from ASN
             ipPrefix = vrp["prefix"]
             maxLength = vrp["maxLength"]
-            #print("Adding: AS%s, Prefix: %s, maxLength: %s" % (str(asn), ipPrefix, str(maxLength)))
             self.addBaseVRP(int(asn), ipPrefix, maxLength)
 
     def getBaseSnapshot(self):
+        """
+        Fetches the base snapshot from the blockchain
+        :return: Base snapshot
+        :rtype: Dict
+        """
         baseSize = self.getBaseSize()
         snapshot = []
-        for i in range(baseSize):
+
+        for i in range(baseSize):  # Fetch every VRP
             vrp = self.getBaseVRP(i)
             snapshot.append(vrp)
         return snapshot
 
     def applyDeltas(self, snapshot):
+        """
+        Applies the deltas to a base snapshot in chronological order
+        :param snapshot: base snapshot
+        :type snapshot: Dict
+        :return: snapshot with deltas applied
+        :rtype: Dict
+        """
         deltaCount = self.getDeltaCount()
-        for i in range(deltaCount):
-            addCount = self.getDeltaEntryCount(i, True)
-            rmvCount = self.getDeltaEntryCount(i, False)
-            for j in range(addCount):
+        for i in range(deltaCount):  # Delta loop
+            addcount = self.getDeltaEntryCount(i, True)
+            rmvcount = self.getDeltaEntryCount(i, False)
+            for j in range(addcount):  # Delta add loop
                 snapshot.append(self.getDeltaVRP(i, j, True))
-            for k in range(rmvCount):
+            for k in range(rmvcount):  # Delta remove loop
                 snapshot.remove(self.getDeltaVRP(i, k, False))
 
     def getNewestSnapshot(self):
+        """
+        Fetch the newest snapshot from the blockchain
+        :return: Most recent snapshot
+        :rtype: Dict
+        """
         snapshot = self.getBaseSnapshot()
         self.applyDeltas(snapshot)
-        finalDict = {"roas": []}
+        finalDict = {"roas": []}  # Build json structure to be used by RTRTR
         for vrp in snapshot:
-            finalDict["roas"].append({"asn": vrp[0], "prefix": vrp[1], "maxLength": vrp[2], "ta": "bc"})
-
-        return json.dumps(finalDict)
-
+            finalDict["roas"].append({"asn": "AS" + vrp[0], "prefix": vrp[1], "maxLength": vrp[2],
+                                      "ta": "bc"})  # Trust anchor not stored, therefore bc (blockchain) is denoted
+        return finalDict

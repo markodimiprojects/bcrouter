@@ -1,6 +1,8 @@
-import time
-import multiprocessing as mp
+__author__ = "Marko Dimitrijevic, 7633863"
 
+import time
+import json
+import multiprocessing as mp
 from blockchainHandler import blockchainHandler
 from jsonHandler import jsonHandler
 
@@ -22,12 +24,11 @@ def uploadTest():
         print("Error starting parallel", str(e))
 
 
-"""
-Uploads the base snapshot
-"""
-
-
 def baseUpload():
+    """
+    Uploads only the base snapshot
+    Only used by maintainer
+    """
     # Establish Routinator and Blockchain connection
     jsonH = jsonHandler()
     bcH = blockchainHandler()
@@ -37,12 +38,11 @@ def baseUpload():
     bcH.addAllBaseVRPS(baseVRPS.json())
 
 
-"""
-Uploads all new deltas
-"""
-
-
 def deltaUpload():
+    """
+    Uploads all new deltas
+    Only used by maintainer
+    """
     # Establish Routinator and Blockchain connection
     jsonH = jsonHandler()
     bcH = blockchainHandler()
@@ -51,26 +51,35 @@ def deltaUpload():
     session = deltaNotify["session"]
     nextSerial = 1
 
-    # This loop regularly checks, when a new Delta is created
+    # This loop regularly checks, whether a new Delta is created
     # Once a new Delta gets detected, it gets uploaded to the Blockchain
     while True:
         deltaNotify = jsonH.getDeltaNotify().json()
-        print("Current delta serial: %s" % (deltaNotify["serial"]))
+        # If specified delta update version is reached
         if deltaNotify["serial"] == nextSerial:
             uploadDelta = jsonH.getDeltaData(session, nextSerial - 1).json()
             bcH.addDelta(uploadDelta)
+            # This increment can be changed to increase the gap between delta updates
             nextSerial += 1
         time.sleep(15)
 
+
 def downloadTest():
+    """
+    Downloads the most recent snapshot to be utilized by RTRTR
+    """
+    # Establish Blockchain connection
+    # This can be used by any account
     bcH = blockchainHandler()
     snapshot = bcH.getNewestSnapshot()
-    print(snapshot)
+    with open("/json/cache/vrps.json", "w", encoding="utf-8") as f:
+        json.dump(snapshot, f, ensure_ascii=False, indent=4)
 
 
 def main():
+    # By default, this start the base snapshot upload test
     uploadTest()
-    #downloadTest()
+    # downloadTest()
 
 
 if __name__ == '__main__':

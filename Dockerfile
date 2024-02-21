@@ -6,7 +6,7 @@ RUN pip install web3
 
 WORKDIR /usr/app/src
 # Config for rest
-COPY rtrtr.conf /cache/rtrtr.conf
+COPY config/rtrtr.conf /cache/rtrtr.conf
 COPY jsons/Metadata.json ./
 # Environment variables for python
 COPY .env ./
